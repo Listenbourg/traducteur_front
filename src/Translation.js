@@ -223,14 +223,15 @@ export const Translation = () => {
                 <td>{word.attributes.base}</td>
                 <td>{word.attributes.translation}</td>
                 <td>
-                  <button
+                  {/* <button
                     className="inputButton"
                     onClick={() => {
                       deleteTranslation(word.id);
                     }}
                   >
                     Supprimer
-                  </button>
+                  </button> */}
+                  Aucune actions
                 </td>
               </tr>
             );
