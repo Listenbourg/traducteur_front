@@ -5,6 +5,8 @@ import drapeau from "./Drapeau.png";
 
 export const Translation = () => {
   const BASE_URL = "http://51.210.104.99:1337/api";
+  const TRAD_URL = "http://localhost:1841";
+  //const TRAD_URL = "http://51.210.104.99:1841";
 
   const [snackBar, setSnackBar] = useState({
     open: false,
@@ -226,22 +228,11 @@ export const Translation = () => {
     getManyTranslations();
   }, [categoryFilter, wordFilter]);
 
-  const [t, setT] = useState("");
+  const [toTranslate, setToTranslate] = useState("");
+  const [translateResult, setTranslateResult] = useState("");
 
   return (
     <section className="container">
-      {/* <input
-        placeholder="test"
-        value={t}
-        onChange={(e) => setT(e.target.value)}
-      ></input>
-      <button
-        onClick={(e) => {
-          test(t);
-        }}
-      >
-        trad
-      </button> */}
       <img
         style={{
           width: "10vw",
@@ -261,7 +252,7 @@ export const Translation = () => {
         </h3>
       </div>
 
-      {/* <div className="block">
+      <div className="block">
         <h3>Traduire une phrase</h3>
         <div
           style={{
@@ -275,22 +266,38 @@ export const Translation = () => {
             className="inputText"
             type="text"
             placeholder="Phrase en français"
-            value={listenbourgWord}
-            onChange={(e) => setListenbourgWord(e.target.value)}
+            value={toTranslate}
+            onChange={(e) => setToTranslate(e.target.value)}
           />
-          <button className="inputButton" onClick={addNewTranslation}>
-            Ajouter
+          <button
+            className="inputButton"
+            onClick={async () => {
+              console.log(toTranslate);
+              let res = await axios.post(TRAD_URL + "/translate", {
+                from: "fr",
+                to: "lis",
+                text: toTranslate,
+              });
+              if (res.data.status === 200) {
+                setTranslateResult(res.data.response);
+              }
+            }}
+          >
+            Traduire
           </button>
         </div>
         <textarea
+          value={translateResult}
           placeholder="Resultat..."
           style={{
+            borderRadius: "5px",
+            fontSize: "1.5rem",
             width: "100%",
             marginTop: "20px",
             minHeight: "10vh",
           }}
         ></textarea>
-      </div> */}
+      </div>
 
       <div className="block">
         <h3>Traduire un mot</h3>
