@@ -5,8 +5,8 @@ import drapeau from "./Drapeau.png";
 
 export const Translation = () => {
   const BASE_URL = "http://51.210.104.99:1337/api";
-  const TRAD_URL = "http://localhost:1841";
-  //const TRAD_URL = "http://51.210.104.99:1841";
+  //const TRAD_URL = "http://localhost:1841";
+  const TRAD_URL = "http://51.210.104.99:1841";
 
   const [snackBar, setSnackBar] = useState({
     open: false,
