@@ -12,25 +12,138 @@ export const Translation = () => {
     severity: "success",
   });
 
+  function test(t) {
+    let arr = t.split(/[\s\t]+/);
+
+    for (let b of arr) {
+      let arrB = b.split("#");
+
+      addNewTrad(arrB[0], arrB[1]);
+    }
+  }
+
+  const Line = ({ index, word }) => {
+    const [inputOpen, setInputOpen] = useState(false);
+    const [inputValue, setInputValue] = useState("");
+    let style = {
+      position: "relative",
+    };
+    return (
+      <tr
+        key={index}
+        style={index % 2 == 0 ? { backgroundColor: "#dbdbdb" } : {}}
+      >
+        <td>{word.attributes.category}</td>
+        <td>{word.attributes.base}</td>
+        <td
+          onDoubleClick={() => {
+            if (word.attributes.translation == "") {
+              console.log("ok");
+              setInputOpen(true);
+            }
+          }}
+          style={
+            word.attributes.translation == ""
+              ? { ...style, backgroundColor: "#ffd3d3" }
+              : style
+          }
+        >
+          {inputOpen && (
+            <div
+              style={{
+                position: "absolute",
+                top: "0",
+                left: "0",
+                display: "flex",
+                width: "100%",
+              }}
+            >
+              <input
+                value={inputValue}
+                onChange={(e) => {
+                  setInputValue(e.target.value);
+                }}
+                style={{
+                  width: "100%",
+                }}
+                placeholder="Nouvelle traduction"
+              ></input>
+              <button onClick={() => setInputOpen(false)}>Annuler</button>
+              <button
+                onClick={async () => {
+                  await updateTrad(word.id, word.attributes.base, inputValue);
+                  await getManyTranslations();
+                }}
+              >
+                Enregistrer
+              </button>
+            </div>
+          )}
+          {word.attributes.translation !== "" && word.attributes.translation}
+          {word.attributes.translation == "" && (
+            <span
+              style={{
+                padding: "5px",
+              }}
+            >
+              Double-cliquez pour ajouter
+            </span>
+          )}
+        </td>
+        <td>
+          {/* <button
+        className="inputButton"
+        onClick={() => {
+          deleteTranslation(word.id);
+        }}
+      >
+        Supprimer
+      </button> */}
+          <span
+            style={{
+              fontStyle: "italic",
+            }}
+          >
+            Aucune actions
+          </span>
+        </td>
+      </tr>
+    );
+  };
+
   // Translations
   const [translation, setTranslation] = useState([]);
+  const [category, setCategories] = useState([]);
 
   // Add a translation
   const [frenchWord, setFrenchWord] = useState("");
   const [listenbourgWord, setListenbourgWord] = useState("");
   const [addWordError, setAddWordError] = useState("");
 
-  const WORDS_CATEGORIES = [
-    "Verbe",
-    "Nom",
-    "Adjectif",
-    "Adverbe",
-    "Politesse",
-    "Nombre",
-    "Autre",
-  ];
+  const [wordCategory, setWordCategory] = useState("");
 
-  const [wordCategory, setWordCategory] = useState(WORDS_CATEGORIES[0]);
+  async function addNewTrad(val1, val2) {
+    await axios.post(BASE_URL + "/translations", {
+      data: {
+        word: val1.toLowerCase() + "#" + val2.toLowerCase(),
+        category: wordCategory.toLowerCase(),
+        language: "fr#lis",
+        from: "fr",
+        to: "lis",
+        base: val1.toLowerCase(),
+        translation: val2.toLowerCase(),
+      },
+    });
+  }
+
+  async function updateTrad(id, base, newVal) {
+    await axios.put(BASE_URL + "/translations/" + id, {
+      data: {
+        word: base.toLowerCase() + "#" + newVal.toLowerCase(),
+        translation: newVal.toLowerCase(),
+      },
+    });
+  }
 
   // Filter results
   const [categoryFilter, setCategoryFilter] = useState(null);
@@ -83,17 +196,25 @@ export const Translation = () => {
   // Fetch all translations
   useEffect(() => {
     getManyTranslations();
+    getCategories();
   }, []);
 
+  async function getCategories() {
+    let request = "/categories";
+    let categories = await axios.get(BASE_URL + request);
+    setWordCategory(categories.data.data[0].attributes.name);
+    setCategories(categories.data.data);
+  }
+
   async function getManyTranslations() {
-    let request = "/translations";
+    let request = "/translations?pagination[start]=0&pagination[limit]=1000000";
 
     if (wordFilter) {
-      request += `?filters[word][$contains]=${wordFilter}`;
+      request += `&filters[word][$contains]=${wordFilter}`;
     }
 
     if (categoryFilter && categoryFilter !== "Aucune") {
-      request += `?filters[category][$eq]=${categoryFilter}`;
+      request += `&filters[category][$eq]=${categoryFilter}`;
     }
 
     let translations = await axios.get(BASE_URL + request);
@@ -105,8 +226,22 @@ export const Translation = () => {
     getManyTranslations();
   }, [categoryFilter, wordFilter]);
 
+  const [t, setT] = useState("");
+
   return (
     <section className="container">
+      {/* <input
+        placeholder="test"
+        value={t}
+        onChange={(e) => setT(e.target.value)}
+      ></input>
+      <button
+        onClick={(e) => {
+          test(t);
+        }}
+      >
+        trad
+      </button> */}
       <img
         style={{
           width: "10vw",
@@ -164,9 +299,9 @@ export const Translation = () => {
           value={wordCategory}
           onChange={(e) => setWordCategory(e.target.value)}
         >
-          {WORDS_CATEGORIES.map((category) => (
-            <option key={category} value={category.toLowerCase()}>
-              {category}
+          {category.map((cat) => (
+            <option key={cat.id} value={cat.attributes.name.toLowerCase()}>
+              {cat.attributes.name}
             </option>
           ))}
         </select>
@@ -207,9 +342,9 @@ export const Translation = () => {
             onChange={(e) => setCategoryFilter(e.target.value)}
           >
             <option value={null}>Aucune</option>
-            {WORDS_CATEGORIES.map((category) => (
-              <option key={category} value={category.toLowerCase()}>
-                {category}
+            {category.map((cat) => (
+              <option key={cat.id} value={cat.attributes.name.toLowerCase()}>
+                {cat.attributes.name}
               </option>
             ))}
           </select>
@@ -237,6 +372,7 @@ export const Translation = () => {
             width: "100%",
             marginTop: "20px",
             textAlign: "left",
+            borderCollapse: "collapse",
           }}
         >
           <tr
@@ -250,30 +386,7 @@ export const Translation = () => {
             <th>Actions</th>
           </tr>
           {translation.map((word, index) => {
-            return (
-              <tr key={index}>
-                <td>{word.attributes.category}</td>
-                <td>{word.attributes.base}</td>
-                <td>{word.attributes.translation}</td>
-                <td>
-                  {/* <button
-                    className="inputButton"
-                    onClick={() => {
-                      deleteTranslation(word.id);
-                    }}
-                  >
-                    Supprimer
-                  </button> */}
-                  <span
-                    style={{
-                      fontStyle: "italic",
-                    }}
-                  >
-                    Aucune actions
-                  </span>
-                </td>
-              </tr>
-            );
+            return <Line word={word} index={index} />;
           })}
         </table>
       </div>
