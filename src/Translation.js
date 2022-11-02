@@ -1,8 +1,16 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { Alert, Snackbar } from "@mui/material";
+import drapeau from "./Drapeau.png";
 
 export const Translation = () => {
   const BASE_URL = "http://51.210.104.99:1337/api";
+
+  const [snackBar, setSnackBar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   // Translations
   const [translation, setTranslation] = useState([]);
@@ -30,17 +38,36 @@ export const Translation = () => {
 
   async function addNewTranslation() {
     if (wordCategory && frenchWord && listenbourgWord) {
-      await axios.post(BASE_URL + "/translations", {
-        data: {
-          word: frenchWord.toLowerCase() + "#" + listenbourgWord.toLowerCase(),
-          category: wordCategory.toLowerCase(),
-          language: "fr#lis",
-          from: "fr",
-          to: "lis",
-          base: frenchWord.toLowerCase(),
-          translation: listenbourgWord.toLowerCase(),
-        },
-      });
+      let word = await axios.get(
+        `${BASE_URL}/translations?filters[base][$eq]=${frenchWord}`
+      );
+
+      if (word.data.data.length === 0) {
+        await axios.post(BASE_URL + "/translations", {
+          data: {
+            word:
+              frenchWord.toLowerCase() + "#" + listenbourgWord.toLowerCase(),
+            category: wordCategory.toLowerCase(),
+            language: "fr#lis",
+            from: "fr",
+            to: "lis",
+            base: frenchWord.toLowerCase(),
+            translation: listenbourgWord.toLowerCase(),
+          },
+        });
+
+        setSnackBar({
+          open: true,
+          message: "Le mot a bien été ajouté !",
+          severity: "success",
+        });
+      } else {
+        setSnackBar({
+          open: true,
+          message: "Le mot existe déja !",
+          severity: "error",
+        });
+      }
 
       getManyTranslations();
     } else {
@@ -80,6 +107,12 @@ export const Translation = () => {
 
   return (
     <section className="container">
+      <img
+        style={{
+          width: "10vw",
+        }}
+        src={drapeau}
+      ></img>
       <div>
         <h1>
           Il y a actuellement{" "}
@@ -231,13 +264,35 @@ export const Translation = () => {
                   >
                     Supprimer
                   </button> */}
-                  Aucune actions
+                  <span
+                    style={{
+                      fontStyle: "italic",
+                    }}
+                  >
+                    Aucune actions
+                  </span>
                 </td>
               </tr>
             );
           })}
         </table>
       </div>
+
+      <Snackbar
+        open={snackBar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackBar({ open: false, message: "", severity: "" })}
+      >
+        <Alert
+          onClose={() =>
+            setSnackBar({ open: false, message: "", severity: "" })
+          }
+          severity={snackBar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackBar.message}
+        </Alert>
+      </Snackbar>
     </section>
   );
 };
