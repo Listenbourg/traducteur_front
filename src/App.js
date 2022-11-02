@@ -1,24 +1,33 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import { Translation } from "./Translation";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
+    <>
+      <div className="App">
+        <Translation />
+      </div>
+      <footer
+        style={{
+          display: "flex",
+          justifyContent: "start",
+          alignItems: "center",
+          backgroundColor: "#AFAFAF",
+        }}
+      >
+        <p>© Listenbourg 2022&nbsp;</p>
         <a
-          className="App-link"
-          href="https://reactjs.org"
+          style={{
+            color: "black",
+            fontWeight: "bold",
+          }}
+          href="https://github.com/Listenbourg"
           target="_blank"
-          rel="noopener noreferrer"
         >
-          Learn React
+          Made with ❤️ Github
         </a>
-      </header>
-    </div>
+      </footer>
+    </>
   );
 }
 
