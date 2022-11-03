@@ -232,6 +232,9 @@ export const Translation = () => {
       }
 
       getManyTranslations();
+
+      setListenbourgWord("");
+      setFrenchWord("");
     } else {
       setAddWordError("Veuillez remplir tous les champs");
     }
