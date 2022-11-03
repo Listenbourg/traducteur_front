@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Alert, Snackbar } from "@mui/material";
+import { Alert, Snackbar, Switch } from "@mui/material";
 import drapeau from "./Drapeau.png";
 
 export const Translation = () => {
@@ -14,75 +14,93 @@ export const Translation = () => {
     severity: "success",
   });
 
-  function test(t) {
-    let arr = t.split(/[\s\t]+/);
-
-    for (let b of arr) {
-      let arrB = b.split("#");
-
-      addNewTrad(arrB[0], arrB[1]);
-    }
-  }
-
   const Line = ({ index, word }) => {
-    const [inputOpen, setInputOpen] = useState(false);
-    const [inputValue, setInputValue] = useState("");
+    const [backup, setBackup] = useState({
+      category: word.attributes.category,
+      base: word.attributes.base,
+      translation: word.attributes.translation,
+    });
+
+    const [editor, setEditor] = useState(false);
+
+    const [data, setData] = useState({
+      category: word.attributes.category,
+      base: word.attributes.base,
+      translation: word.attributes.translation,
+    });
+
     let style = {
       position: "relative",
     };
+
     return (
       <tr
+        title="Double clique sur une ligne pour la modifier !"
         key={index}
-        style={index % 2 == 0 ? { backgroundColor: "#dbdbdb" } : {}}
+        className={editor ? "trEdit" : index % 2 === 0 ? "trSecond" : ""}
+        onDoubleClick={() => {
+          setEditor(true);
+        }}
       >
-        <td>{word.attributes.category}</td>
-        <td>{word.attributes.base}</td>
+        <td>{word.id}</td>
+        <td>
+          {editor && (
+            <select
+              className="inputSelect"
+              value={data.category}
+              onChange={(e) =>
+                setData({
+                  ...data,
+                  category: e.target.value,
+                })
+              }
+            >
+              {category.map((cat) => (
+                <option key={cat.id} value={cat.attributes.name.toLowerCase()}>
+                  {cat.attributes.name}
+                </option>
+              ))}
+            </select>
+          )}
+          {!editor && data.category}
+        </td>
+        <td>
+          {editor && (
+            <input
+              className="inputText"
+              value={data.base}
+              onChange={(e) => {
+                setData({
+                  ...data,
+                  base: e.target.value,
+                });
+              }}
+            ></input>
+          )}
+          {!editor && data.base}
+        </td>
         <td
-          onDoubleClick={() => {
-            if (word.attributes.translation == "") {
-              console.log("ok");
-              setInputOpen(true);
-            }
-          }}
           style={
-            word.attributes.translation == ""
+            word.attributes.translation == "" && !editor
               ? { ...style, backgroundColor: "#ffd3d3" }
               : style
           }
         >
-          {inputOpen && (
-            <div
-              style={{
-                position: "absolute",
-                top: "0",
-                left: "0",
-                display: "flex",
-                width: "100%",
+          {editor && (
+            <input
+              className="inputText"
+              value={data.translation}
+              onChange={(e) => {
+                setData({
+                  ...data,
+                  translation: e.target.value,
+                });
               }}
-            >
-              <input
-                value={inputValue}
-                onChange={(e) => {
-                  setInputValue(e.target.value);
-                }}
-                style={{
-                  width: "100%",
-                }}
-                placeholder="Nouvelle traduction"
-              ></input>
-              <button onClick={() => setInputOpen(false)}>Annuler</button>
-              <button
-                onClick={async () => {
-                  await updateTrad(word.id, word.attributes.base, inputValue);
-                  await getManyTranslations();
-                }}
-              >
-                Enregistrer
-              </button>
-            </div>
+            ></input>
           )}
-          {word.attributes.translation !== "" && word.attributes.translation}
-          {word.attributes.translation == "" && (
+          {!editor && data.translation}
+          {/* No translation, set placeholder text */}
+          {!editor && data.translation == "" && (
             <span
               style={{
                 padding: "5px",
@@ -93,21 +111,50 @@ export const Translation = () => {
           )}
         </td>
         <td>
-          {/* <button
-        className="inputButton"
-        onClick={() => {
-          deleteTranslation(word.id);
-        }}
-      >
-        Supprimer
-      </button> */}
-          <span
-            style={{
-              fontStyle: "italic",
-            }}
-          >
-            Aucune actions
-          </span>
+          {editor && (
+            <>
+              <button
+                className="inputButton"
+                onClick={() => {
+                  setData(backup);
+                  setEditor(false);
+                }}
+              >
+                Annuler
+              </button>
+              <button
+                className="inputButton"
+                onClick={async () => {
+                  if (!data.category || !data.base || !data.translation) {
+                    setSnackBar({
+                      open: true,
+                      message: "Veuillez remplir tous les champs",
+                      severity: "error",
+                    });
+                  } else {
+                    await updateTrad(word.id, data);
+                    await getManyTranslations();
+                    setSnackBar({
+                      open: true,
+                      message: "Traduction mise à jour",
+                      severity: "success",
+                    });
+                  }
+                }}
+              >
+                Enregistrer
+              </button>
+            </>
+          )}
+          {!editor && (
+            <span
+              style={{
+                fontStyle: "italic",
+              }}
+            >
+              Aucune actions
+            </span>
+          )}
         </td>
       </tr>
     );
@@ -138,11 +185,13 @@ export const Translation = () => {
     });
   }
 
-  async function updateTrad(id, base, newVal) {
+  async function updateTrad(id, data) {
     await axios.put(BASE_URL + "/translations/" + id, {
       data: {
-        word: base.toLowerCase() + "#" + newVal.toLowerCase(),
-        translation: newVal.toLowerCase(),
+        category: data.category.toLowerCase(),
+        word: data.base.toLowerCase() + "#" + data.translation.toLowerCase(),
+        base: data.base.toLowerCase(),
+        translation: data.translation.toLowerCase(),
       },
     });
   }
@@ -231,14 +280,43 @@ export const Translation = () => {
   const [toTranslate, setToTranslate] = useState("");
   const [translateResult, setTranslateResult] = useState("");
 
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    if (darkMode) {
+      document.body.classList.add("dark");
+    } else {
+      document.body.classList.remove("dark");
+    }
+  }, [darkMode]);
+
   return (
     <section className="container">
-      <img
+      <div
         style={{
-          width: "10vw",
+          display: "flex",
+          flexDirection: "row",
         }}
-        src={drapeau}
-      ></img>
+      >
+        <img
+          style={{
+            width: "10vw",
+          }}
+          src={drapeau}
+        ></img>
+        <div>
+          <h4>Dark mode</h4>
+
+          <Switch
+            checked={darkMode}
+            onChange={() => {
+              setDarkMode(!darkMode);
+            }}
+            name="checkedA"
+            inputProps={{ "aria-label": "secondary checkbox" }}
+          />
+        </div>
+      </div>
       <div>
         <h1>
           Il y a actuellement{" "}
@@ -247,9 +325,7 @@ export const Translation = () => {
           </span>{" "}
           mots traduits !
         </h1>
-        <h3>
-          (Rafraichir la page pour obtenir les mots traduits par tout le monde)
-        </h3>
+        <h3>(Rafraichir la page pour obtenir les dernières traductions)</h3>
       </div>
 
       <div className="block">
@@ -387,6 +463,7 @@ export const Translation = () => {
               fontSize: "20px",
             }}
           >
+            <th>ID</th>
             <th>Categorie</th>
             <th>Mot français</th>
             <th>Mot listenbourgeois</th>

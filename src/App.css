@@ -1,3 +1,13 @@
+body {
+  transition: 0.2s all ease-in-out;
+  background-color: #ececec;
+}
+
+.dark {
+  background-color: #333;
+  color: #fff;
+}
+
 .container {
   margin: 20px;
 }
@@ -10,16 +20,17 @@
   font-family: "Roboto", sans-serif;
 }
 
-html {
-  background-color: #ececec;
-}
-
 .block {
   margin-top: 5vh;
   padding: 10px;
   background-color: white;
   border-radius: 5px;
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
+}
+
+.dark .block {
+  background-color: rgb(87, 87, 87);
+  color: #fff;
 }
 
 .inputText {
@@ -56,4 +67,21 @@ html {
   font-size: 18px;
   height: 100%;
   cursor: pointer;
+}
+
+td {
+  padding: 5px 20px;
+}
+
+.trEdit {
+  background-color: #ffd892;
+}
+
+.trSecond {
+  background-color: rgb(219, 219, 219);
+}
+
+.dark .trSecond {
+  background-color: rgb(10 10 10);
+  color: #fff;
 }
