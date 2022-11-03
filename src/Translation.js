@@ -80,10 +80,8 @@ export const Translation = () => {
           {!editor && data.base}
         </td>
         <td
-          style={
-            word.attributes.translation == "" && !editor
-              ? { ...style, backgroundColor: "#ffd3d3" }
-              : style
+          className={
+            word.attributes.translation == "" && !editor ? "emptyCell" : ""
           }
         >
           {editor && (
@@ -280,7 +278,7 @@ export const Translation = () => {
   const [toTranslate, setToTranslate] = useState("");
   const [translateResult, setTranslateResult] = useState("");
 
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
 
   useEffect(() => {
     if (darkMode) {

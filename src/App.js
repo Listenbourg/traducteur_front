@@ -7,23 +7,9 @@ function App() {
       <div className="App">
         <Translation />
       </div>
-      <footer
-        style={{
-          display: "flex",
-          justifyContent: "start",
-          alignItems: "center",
-          backgroundColor: "#AFAFAF",
-        }}
-      >
+      <footer>
         <p>© Listenbourg 2022&nbsp;</p>
-        <a
-          style={{
-            color: "black",
-            fontWeight: "bold",
-          }}
-          href="https://github.com/Listenbourg"
-          target="_blank"
-        >
+        <a href="https://github.com/Listenbourg" target="_blank">
           Made with ❤️ Github
         </a>
       </footer>

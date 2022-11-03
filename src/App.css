@@ -1,11 +1,15 @@
+:root {
+  --dark-color: #eae4ff;
+}
+
 body {
   transition: 0.2s all ease-in-out;
   background-color: #ececec;
 }
 
 .dark {
-  background-color: #333;
-  color: #fff;
+  background-color: #1c1b1f;
+  color: var(--dark-color);
 }
 
 .container {
@@ -29,8 +33,27 @@ body {
 }
 
 .dark .block {
-  background-color: rgb(87, 87, 87);
-  color: #fff;
+  background-color: hsl(255, 7%, 15%);
+  border: 1px solid #55555522;
+  color: var(--dark-color);
+}
+
+.dark input {
+  background-color: #42414a;
+  border: 1px solid #55555522;
+  color: var(--dark-color);
+}
+
+.dark textarea {
+  background-color: #42414a;
+  border: 1px solid #55555522;
+  color: var(--dark-color);
+}
+
+.dark select {
+  background-color: #42414a;
+  border: 1px solid #55555522;
+  color: var(--dark-color);
 }
 
 .inputText {
@@ -82,6 +105,37 @@ td {
 }
 
 .dark .trSecond {
-  background-color: rgb(10 10 10);
-  color: #fff;
+  background-color: #0f0f11;
+  color: var(--dark-color);
+}
+
+.emptyCell {
+  background-color: #ffd3d3;
+  color: #0f0f11;
+}
+
+.dark .emptyCell {
+  background-color: #ffd3d3;
+  color: #0f0f11;
+}
+
+footer {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  background-color: #afafaf;
+  margin-top: 50px;
+}
+
+.dark footer {
+  background-color: #09090a;
+}
+
+footer a {
+  color: black;
+  font-weight: bold;
+}
+
+.dark footer a {
+  color: var(--dark-color);
 }
